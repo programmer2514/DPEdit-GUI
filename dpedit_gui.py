@@ -163,9 +163,11 @@ def check_for_updates(args=None):
     if update_app:
         vnum = search(r"CURRENT_VERSION = \"([0-9.]+)\"", str(response_app.content)).group(1)
         if messagebox.askyesno(message="An update (v" + vnum + ") is available for DPEdit-GUI.\nWould you like to install it now?", icon="question", title="Update"):
-            with open("dpedit_gui.py", "wb") as outfile:
+            with open(__file__, "wb") as outfile:
                 outfile.write(response_app.content)
-            messagebox.showinfo(message="DPEdit-GUI has been updated successfully!\n Please restart the application to apply changes.", title="Success")
+            messagebox.showinfo(message="DPEdit-GUI has been updated successfully!\n The application will now restart to apply changes.", title="Success")
+            proc = Popen(__file__)
+            root.destroy()
 
 
 # Opens the DPEdit-GUI website
