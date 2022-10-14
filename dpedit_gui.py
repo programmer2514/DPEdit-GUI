@@ -6,7 +6,7 @@ from tkinter import messagebox, filedialog
 
 
 DPEDIT_URL = "https://github.com/programmer2514/DPEdit/releases/latest/download/DPEdit.exe"
-UPDATE_URL = "https://raw.githubusercontent.com/programmer2514/DPEdit-GUI/main/dpedit-gui.py"
+UPDATE_URL = "https://raw.githubusercontent.com/programmer2514/DPEdit-GUI/main/dpedit_gui.py"
 CURRENT_VERSION = "1.0.0"
 
 monitor_positions = []
@@ -144,7 +144,7 @@ def check_for_updates(args=None):
     # Check for application updates
     response_app = get(UPDATE_URL)
     try:
-        file = open("dpedit_gui.py", "rb")
+        file = open(__file__, "rb")
         local_content = file.read()
         if (local_content != response_app.content):
             update_app = True
@@ -166,7 +166,7 @@ def check_for_updates(args=None):
             with open(__file__, "wb") as outfile:
                 outfile.write(response_app.content)
             messagebox.showinfo(message="DPEdit-GUI has been updated successfully!\n The application will now restart to apply changes.", title="Success")
-            proc = Popen(__file__)
+            Popen(__file__)
             root.destroy()
 
 
