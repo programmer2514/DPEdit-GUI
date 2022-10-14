@@ -2,11 +2,11 @@ import tkinter as tk
 from re import search
 from requests import get
 from subprocess import Popen, PIPE, STDOUT
+from tkinter import messagebox, filedialog
 
 
 DPEDIT_URL = "https://github.com/programmer2514/DPEdit/releases/latest/download/DPEdit.exe"
-UPDATE_URL = ""
-VERSION_URL = "https://raw.githubusercontent.com/programmer2514/DPEdit-GUI/main/VERSION"
+UPDATE_URL = "https://raw.githubusercontent.com/programmer2514/DPEdit-GUI/main/dpedit-gui.py"
 CURRENT_VERSION = "1.0.0"
 
 monitor_positions = []
@@ -14,6 +14,10 @@ changes = []
 is_applied = True
 is_saved = False
 profile_name = "default"
+
+root = tk.Tk()
+root.title('DPEdit GUI')
+root.iconbitmap("dpedit.ico")
 
 
 # Returns monitor position/size data in a list of tuples
@@ -123,36 +127,45 @@ def keyboard_shortcuts(args=None):
 
 # Checks the application for updates
 def check_for_updates(args=None):
-    return
+    update_bin = False
+    update_app = False
 
-
-# Updates the DPEdit binary
-def update_binaries():
-    update = False
-
-    # Check for updates
-    response = get(DPEDIT_URL)
+    # Check for DPEdit updates
+    response_bin = get(DPEDIT_URL)
     try:
         file = open("DPEdit.exe", "rb")
         local_content = file.read()
-        if (local_content != response.content):
-            update = True
+        if (local_content != response_bin.content):
+            update_bin = True
         file.close()
     except:
-        update = True
+        update_bin = True
 
-    # Download if needed
-    if update:
-        outfile = open("DPEdit.exe", "wb")
-        outfile.write(response.content)
-        outfile.close()
-    
-    return update
+    # Check for application updates
+    response_app = get(UPDATE_URL)
+    try:
+        file = open("dpedit_gui.py", "rb")
+        local_content = file.read()
+        if (local_content != response_app.content):
+            update_app = True
+        file.close()
+    except:
+        update_app = True
 
+    # Update binaries if necessary
+    if update_bin:
+        if messagebox.askyesno(message="An update is available for the DPEdit binary.\nWould you like to install it now?", icon="question", title="Update"):
+            with open("DPEdit.exe", "wb") as outfile:
+                outfile.write(response_app.content)
+            messagebox.showinfo(message="DPEdit binary updated successfully!", title="Success")
 
-# Updates the application
-def update_application():
-    return
+    # Update application if necessary
+    if update_app:
+        vnum = search(r"CURRENT_VERSION = \"([0-9.]+)\"", str(response_app.content)).group(1)
+        if messagebox.askyesno(message="An update (v" + vnum + ") is available for DPEdit-GUI.\nWould you like to install it now?", icon="question", title="Update"):
+            with open("dpedit_gui.py", "wb") as outfile:
+                outfile.write(response_app.content)
+            messagebox.showinfo(message="DPEdit-GUI has been updated successfully!\n Please restart the application to apply changes.", title="Success")
 
 
 # Opens the DPEdit-GUI website
@@ -167,12 +180,7 @@ def quit_app(args=None):
 
 # Main application code
 if __name__ == "__main__":
-    
-    # Initialize main window
-    root = tk.Tk()
-    root.title('DPEdit GUI')
-    root.iconbitmap("dpedit.ico")
-
+    check_for_updates()
     # Initialize menus
     main_menu = tk.Menu(root)
     file_menu = tk.Menu(main_menu, tearoff="off")
