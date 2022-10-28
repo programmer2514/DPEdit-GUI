@@ -12,7 +12,7 @@ from ast import literal_eval
 # -------------
 DPEDIT_URL = 'https://github.com/programmer2514/DPEdit/releases/latest/download/DPEdit.exe'
 UPDATE_URL = 'https://raw.githubusercontent.com/programmer2514/DPEdit-GUI/main/dpedit_gui.py'
-CURRENT_VERSION = '1.0.0'
+CURRENT_VERSION = "1.0.0"
 
 
 
@@ -932,13 +932,12 @@ def check_for_updates(args=None):
     if update_bin:
         if messagebox.askyesno(message='An update is available for the DPEdit binary.\nWould you like to install it now?', title='Update'):
             with open('DPEdit.exe', 'wb') as outfile:
-                outfile.write(response_app.content)
+                outfile.write(response_bin.content)
             messagebox.showinfo(message='DPEdit binary updated successfully!', title='Success')
 
     # Update application if necessary
     if update_app:
-        print(str(response_app.content))
-        vnum = search(r'CURRENT_VERSION = [\'\"]([0-9.]+)[\'\"]', str(response_app.content)).group(1)
+        vnum = search(r'CURRENT_VERSION = "([0-9.]+)"', str(response_app.content)).group(1)
         if messagebox.askyesno(message='An update (v' + vnum + ') is available for DPEdit-GUI.\nWould you like to install it now?', title='Update'):
             with open(__file__, 'wb') as outfile:
                 outfile.write(response_app.content)
