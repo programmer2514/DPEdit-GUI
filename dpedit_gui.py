@@ -930,7 +930,7 @@ def check_for_updates(args=None):
 
     # Update binaries if necessary
     if update_bin:
-        if messagebox.askyesno(message='An update is available for the DPEdit binary.\nWould you like to install it now?', title='Update'):
+        if messagebox.askyesno(message='Your DPEdit binary is outdated or missing.\nWould you like to download it now?', title='Update'):
             with open('DPEdit.exe', 'wb') as outfile:
                 outfile.write(response_bin.content)
             messagebox.showinfo(message='DPEdit binary updated successfully!', title='Success')
