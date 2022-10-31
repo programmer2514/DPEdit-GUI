@@ -12,7 +12,7 @@ from ast import literal_eval
 # -------------
 DPEDIT_URL = 'https://github.com/programmer2514/DPEdit/releases/latest/download/DPEdit.exe'
 UPDATE_URL = 'https://raw.githubusercontent.com/programmer2514/DPEdit-GUI/main/dpedit_gui.py'
-CURRENT_VERSION = "1.0.2"
+CURRENT_VERSION = "1.0.1"
 
 
 
@@ -210,13 +210,15 @@ class DisplayManager(tk.Frame):
             self.__drag_data['x'] = 0
             self.__drag_data['y'] = 0
 
-            # Update sidebar data
+            # Update sidebar data and saved state
             if len(self.__changes) == 1:
                 self.__btn_reset.configure(state=tk.DISABLED)
                 self.__btn_apply.configure(state=tk.DISABLED)
-
-            self.__saved[0] = False
-            self.__parent.title(self.__parent.title().strip('*') + '*')
+                self.__saved[0] = True
+                self.__parent.title(self.__parent.title().strip('*'))
+            else:
+                self.__saved[0] = False
+                self.__parent.title(self.__parent.title().strip('*') + '*')
             
 
 
