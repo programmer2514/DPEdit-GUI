@@ -11,5 +11,5 @@ A simple UI for the [DPEdit](https://github.com/programmer2514/DPEdit) utility.
 * Fully portable - No installation required
 
 ## How to install
-* Make sure you have [Python 3](https://www.python.org/downloads/) installed on your device
+* Make sure you have [Python 3](https://www.python.org/downloads/) installed on your device __and that you selected `Add to PATH` when installing__
 * Download and run the all-in-one downloader and executable from the [releases](https://github.com/programmer2514/DPEdit-GUI/releases/latest) page
