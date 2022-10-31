@@ -12,7 +12,7 @@ from ast import literal_eval
 # -------------
 DPEDIT_URL = 'https://github.com/programmer2514/DPEdit/releases/latest/download/DPEdit.exe'
 UPDATE_URL = 'https://raw.githubusercontent.com/programmer2514/DPEdit-GUI/main/dpedit_gui.py'
-CURRENT_VERSION = "1.0.0"
+CURRENT_VERSION = "1.0.1"
 
 
 
@@ -927,6 +927,16 @@ def check_for_updates(args=None):
         file.close()
     except:
         update_app = True
+        
+    # Update application if necessary
+    if update_app:
+        vnum = search(r'CURRENT_VERSION = "([0-9.]+)"', str(response_app.content)).group(1)
+        if messagebox.askyesno(message='An update (v' + CURRENT_VERSION + ' -> v' + vnum + ') is available for DPEdit-GUI.\nWould you like to install it now?', title='Update'):
+            with open(__file__, 'wb') as outfile:
+                outfile.write(response_app.content)
+            messagebox.showinfo(message='DPEdit-GUI has been updated successfully!\n The application will now restart to apply changes.', title='Success')
+            Popen(__file__, shell=True)
+            root.destroy()
 
     # Update binaries if necessary
     if update_bin:
@@ -934,16 +944,6 @@ def check_for_updates(args=None):
             with open('DPEdit.exe', 'wb') as outfile:
                 outfile.write(response_bin.content)
             messagebox.showinfo(message='DPEdit binary updated successfully!', title='Success')
-
-    # Update application if necessary
-    if update_app:
-        vnum = search(r'CURRENT_VERSION = "([0-9.]+)"', str(response_app.content)).group(1)
-        if messagebox.askyesno(message='An update (v' + vnum + ') is available for DPEdit-GUI.\nWould you like to install it now?', title='Update'):
-            with open(__file__, 'wb') as outfile:
-                outfile.write(response_app.content)
-            messagebox.showinfo(message='DPEdit-GUI has been updated successfully!\n The application will now restart to apply changes.', title='Success')
-            Popen(__file__, shell=True)
-            root.destroy()
 
 
 # Save and quit the application
@@ -966,6 +966,14 @@ if __name__ == '__main__':
     # Application globals
     is_saved = [False]
     profile_path = 'default'
+    
+    # Create file to serve as proof of successful run
+    try:
+        with open('run', 'r') as file:
+            print('Runfile exists')
+    except:
+        with open('run', 'w') as outfile:
+            outfile.write("\n")
     
     check_for_updates()
 
