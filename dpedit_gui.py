@@ -12,7 +12,7 @@ from ast import literal_eval
 # -------------
 DPEDIT_URL = 'https://github.com/programmer2514/DPEdit/releases/latest/download/DPEdit.exe'
 UPDATE_URL = 'https://raw.githubusercontent.com/programmer2514/DPEdit-GUI/main/dpedit_gui.py'
-CURRENT_VERSION = "1.0.1"
+CURRENT_VERSION = "1.0.2"
 
 
 
@@ -964,7 +964,7 @@ def quit_app(args=None):
 if __name__ == '__main__':
 
     # Application globals
-    is_saved = [False]
+    is_saved = [True]
     profile_path = 'default'
     
     # Create file to serve as proof of successful run
@@ -979,7 +979,7 @@ if __name__ == '__main__':
 
     # Initialize main window
     root = tk.Tk()
-    root.title('DPEdit GUI - ' + profile_path + '*')
+    root.title('DPEdit GUI - ' + profile_path)
     root.iconbitmap('dpedit.ico')
     root.geometry('900x500')
     root.protocol("WM_DELETE_WINDOW", quit_app)
