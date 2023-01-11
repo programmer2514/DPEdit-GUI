@@ -14,7 +14,7 @@ RunApp:
             UrlDownloadToFile, https://raw.githubusercontent.com/programmer2514/DPEdit-GUI/main/dpedit_gui.py, dpedit_gui.py
             UrlDownloadToFile, https://raw.githubusercontent.com/programmer2514/DPEdit-GUI/main/dpedit.ico, dpedit.ico
             
-            RunWait, pyw -3 -m pip install requests,, UseErrorLevel
+            RunWait, py -3 -m pip install requests,, UseErrorLevel
         }
         
         RunWait, pyw -3 dpedit_gui.py,, UseErrorLevel
@@ -23,7 +23,7 @@ RunApp:
             Throw Exception("Run failed!")
         
     } Catch {
-        MsgBox, 0x34, Warning, Python 3 installation not detected!`nWould you like DPEdit-GUI to download and install it now?
+        MsgBox, 0x34, Warning, Prerequisites not detected!`nWould you like DPEdit-GUI to download and install them now?
         IfMsgBox No
             MsgBox, 0x10, Error, Failed to launch DPEdit!`n`nAre you sure Python 3 and the py launcher are installed and added to PATH?`n`nIf this issue persists, try uninstalling "Python Launcher" and "Python 3.x.x" and running the Python installer again.`n`nMake sure to select both "Use admin privileges when installing py.exe" and "Add python.exe to PATH" when reinstalling.
         
@@ -43,8 +43,14 @@ RunApp:
             SetTimer, InstallPython, -1000
             MsgBox,, Installing, Installing Python 3...
 
+            SetTimer, InstallVCRedist, -1000
+            MsgBox,, Installing, Installing Microsoft Visual C++ Redistributables...
+
             FileDelete, pyver.tmp
             FileDelete, python-setup.exe
+            FileDelete, vc_redist.exe
+            
+            RunWait, py -3 -m pip install requests,, UseErrorLevel
             
             GoSub RunApp
         }
@@ -59,5 +65,16 @@ InstallPython:
         MsgBox,, Success, Python 3 installed successfully!
     } Catch {
         MsgBox, 0x10, Error, Failed to install Python 3!
+    }
+Return
+
+InstallVCRedist:
+    Try {
+        UrlDownloadToFile, https://aka.ms/vs/17/release/vc_redist.x64.exe, vc_redist.exe
+        RunWait, vc_redist.x64.exe /silent,, UseErrorLevel
+        WinClose, Installing ahk_class #32770
+        MsgBox,, Success, Microsoft Visual C++ Redistributables installed successfully!
+    } Catch {
+        MsgBox, 0x10, Error, Failed to install Microsoft Visual C++ Redistributables!
     }
 Return
