@@ -80,8 +80,8 @@ Return
 
 InstallVCRedist:
     Try {
-        UrlDownloadToFile, https://aka.ms/vs/17/release/vc_redist.x64.exe, vc_redist.exe
-        RunWait, vc_redist.x64.exe /silent,, UseErrorLevel
+        UrlDownloadToFile, https://aka.ms/vs/17/release/vc_redist.x86.exe, vc_redist.exe
+        RunWait, vc_redist.exe /silent,, UseErrorLevel
         WinClose, Installing ahk_class #32770
         MsgBox,, Success, Microsoft Visual C++ Redistributables installed successfully!
     } Catch {
