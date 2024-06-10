@@ -12,7 +12,7 @@ from ast import literal_eval
 # -------------
 DPEDIT_URL = 'https://github.com/programmer2514/DPEdit/releases/latest/download/DPEdit.exe'
 UPDATE_URL = 'https://raw.githubusercontent.com/programmer2514/DPEdit-GUI/main/dpedit_gui.py'
-CURRENT_VERSION = "1.1.0"
+CURRENT_VERSION = "1.1.1"
 
 
 
@@ -854,7 +854,7 @@ def new_profile(args=None):
 def load_profile(args=None):
     try:
         global profile_path, is_saved
-        with open(filedialog.askopenfilename(initialdir='%userprofile%\Documents', filetypes=(('DPEdit-GUI Config Files', '*.dgc'),('All Files', '*.*'))), 'r') as file:
+        with open(filedialog.askopenfilename(initialdir='%userprofile%\\Documents', filetypes=(('DPEdit-GUI Config Files', '*.dgc'),('All Files', '*.*'))), 'r') as file:
             assert file
             profile_path = file.name
             disp_man.display_coords = literal_eval(file.read())
@@ -885,7 +885,7 @@ def save_profile(args=None):
 def save_profile_as(args=None):
     try:
         global profile_path, is_saved
-        with filedialog.asksaveasfile(mode='w', initialdir='%userprofile%\Documents', defaultextension='.dgc', initialfile=profile_path, filetypes=(('DPEdit-GUI Config Files', '*.dgc'),('All Files', '*.*'))) as file:
+        with filedialog.asksaveasfile(mode='w', initialdir='%userprofile%\\Documents', defaultextension='.dgc', initialfile=profile_path, filetypes=(('DPEdit-GUI Config Files', '*.dgc'),('All Files', '*.*'))) as file:
             assert file
             data = str(disp_man.display_coords)
             file.write(data)
