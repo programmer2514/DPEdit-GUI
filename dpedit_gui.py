@@ -12,7 +12,7 @@ from ast import literal_eval
 # -------------
 DPEDIT_URL = 'https://github.com/programmer2514/DPEdit/releases/latest/download/DPEdit.exe'
 UPDATE_URL = 'https://raw.githubusercontent.com/programmer2514/DPEdit-GUI/main/dpedit_gui.py'
-CURRENT_VERSION = "1.1.1"
+CURRENT_VERSION = "1.1.2"
 
 
 
@@ -899,7 +899,7 @@ def save_profile_as(args=None):
 # Show info about the application
 # -----------------------------------
 def about_app(args=None):
-    messagebox.showinfo('About', 'DPEdit GUI v1.0.0\nCopyright © 2022 Benjamin Pryor\nReleased under the MIT license')
+    messagebox.showinfo('About', 'DPEdit GUI v' + CURRENT_VERSION + '\nCopyright © 2024 Benjamin Pryor\nReleased under the MIT license')
 
 
 # Show all keyboard shortcuts
