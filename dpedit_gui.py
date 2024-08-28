@@ -959,7 +959,8 @@ def check_for_updates(args=None):
             with open(__file__, 'wb') as outfile:
                 outfile.write(response_app.content)
             messagebox.showinfo(message='DPEdit-GUI has been updated successfully!\n The application will now restart to apply changes.', title='Success')
-            Popen(__file__, shell=True)
+            Popen(['pyw', '-3', __file__], shell=True)
+            Popen(['taskkill', '/IM', 'DPEdit-GUI.exe'], shell=True)
             root.destroy()
 
     # Update binaries if necessary
