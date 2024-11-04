@@ -12,7 +12,7 @@ from ast import literal_eval
 # -------------
 DPEDIT_URL = 'https://github.com/programmer2514/DPEdit/releases/latest/download/DPEdit.exe'
 UPDATE_URL = 'https://raw.githubusercontent.com/programmer2514/DPEdit-GUI/main/dpedit_gui.py'
-CURRENT_VERSION = "1.1.2"
+CURRENT_VERSION = "1.1.3"
 
 
 
@@ -104,12 +104,22 @@ class DisplayManager(tk.Frame):
                 messagebox.showerror(message='DPEdit failed to get display position(s)!', title='Error')
 
         # Parse results into an ordered list of dictionaries
+        prev_index = 0
         for line in proc.stdout:
             dline = line.decode('utf-8')
 
             if 'Display #' in dline:
                 regex = search(r'([0-9]+)', dline)
                 index = int(regex.group(1))
+                if (index > prev_index + 1):
+                    for i in range(prev_index, index - 1):
+                        data.append({'index': None,
+                                'primary': None,
+                                'width': None,
+                                'height': None,
+                                'x': None,
+                                'y': None})
+                prev_index = index
                 position_found = False
 
             if 'Primary' in dline:
