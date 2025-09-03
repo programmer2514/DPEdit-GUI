@@ -12,7 +12,7 @@ from ast import literal_eval
 # -------------
 DPEDIT_URL = 'https://github.com/programmer2514/DPEdit/releases/latest/download/DPEdit.exe'
 UPDATE_URL = 'https://raw.githubusercontent.com/programmer2514/DPEdit-GUI/main/dpedit_gui.py'
-CURRENT_VERSION = "1.1.3"
+CURRENT_VERSION = "1.2.0"
 
 
 
@@ -31,6 +31,7 @@ class DisplayManager(tk.Frame):
 
         self.__drag_data = {'x': 0, 'y': 0, 'items': [None, None, None], 'dragged': False}
         self.__orig_view = [0, 0]
+        self.__view_offset = [0, 0]
         self.__selected_display = None
         self.__prev_selected_display = None
         self.__changes = []
@@ -43,6 +44,10 @@ class DisplayManager(tk.Frame):
         # Create canvas
         self.__canvas = tk.Canvas(self)
         self.__canvas.pack(expand=True, fill=tk.BOTH, side=tk.LEFT)
+
+        # Create footer
+        self.__footer = tk.Label(self, text='Drag view to pan  |  Right click to reset', font=('Segoe UI', 10, 'normal'), foreground='black')
+        self.__footer.pack(fill=tk.X, side=tk.BOTTOM, pady=(0, 8))
 
         # Create sidebar top
         self.__sidebar_top = tk.Frame(self)
@@ -83,9 +88,11 @@ class DisplayManager(tk.Frame):
         self.__ui_xy_vals[1].trace_add('write', self.__sync_entry)
 
         # Bind drag/click/resize events
-        self.__bind_drag_events(('draggable', 'static', 'disp_lbl', 'prim_lbl'))
-        self.__canvas.tag_bind('grid', '<ButtonPress-1>', self.__deselect)
-        self.__canvas.bind('<Configure>', self.__resize)
+        self.__canvas.bind('<Configure>', self.__reposition_canvas)
+        self.__canvas.bind('<ButtonPress-1>', self.__drag_start)
+        self.__canvas.bind('<ButtonRelease-1>', self.__drag_stop)
+        self.__canvas.bind('<ButtonPress-3>', self.__drag_reset)
+        self.__canvas.bind('<B1-Motion>', self.__drag)
 
 
     # Return display position/size data in a list of tuples
@@ -214,15 +221,8 @@ class DisplayManager(tk.Frame):
                     diff_xy = ((self.display_coords[display['index'] - 1][0] // 10) - self.__canvas.bbox(self.__drag_data['items'][0])[0] - 1, (self.display_coords[display['index'] - 1][1] // 10) - self.__canvas.bbox(self.__drag_data['items'][0])[1] - 1)
                     self.__move_current_display(*diff_xy)
 
-            # Find median point of all displays and shift canvas so they're centered
-            self.__canvas.xview_moveto(self.__orig_view[0])
-            self.__canvas.yview_moveto(self.__orig_view[1])
-
-            x1, y1, x2, y2 = (*self.__canvas.bbox(*self.__canvas.find_withtag('fg')),)
-            self._median_point = (x1 + (x2 - x1) // 2, y1 + (y2 - y1) // 2)
-
-            self.__canvas.scan_mark(self._median_point[0], self._median_point[1])
-            self.__canvas.scan_dragto(self.__canvas.winfo_width() // 2, self.__canvas.winfo_height() // 2, gain=1)
+            # Update canvas position
+            self.__reposition_canvas()
 
             # Clear drag data
             self.__drag_data['items'][0] = None
@@ -278,15 +278,8 @@ class DisplayManager(tk.Frame):
                     diff_xy = ((self.display_coords[display['index'] - 1][0] // 10) - self.__canvas.bbox(self.__drag_data['items'][0])[0] - 1, (self.display_coords[display['index'] - 1][1] // 10) - self.__canvas.bbox(self.__drag_data['items'][0])[1] - 1)
                     self.__move_current_display(*diff_xy)
 
-            # Find median point of all displays and shift canvas so they're centered
-            self.__canvas.xview_moveto(self.__orig_view[0])
-            self.__canvas.yview_moveto(self.__orig_view[1])
-
-            x1, y1, x2, y2 = (*self.__canvas.bbox(*self.__canvas.find_withtag('fg')),)
-            self._median_point = (x1 + (x2 - x1) // 2, y1 + (y2 - y1) // 2)
-
-            self.__canvas.scan_mark(self._median_point[0], self._median_point[1])
-            self.__canvas.scan_dragto(self.__canvas.winfo_width() // 2, self.__canvas.winfo_height() // 2, gain=1)
+            # Update canvas position
+            self.__reposition_canvas()
 
             # Clear drag data
             self.__drag_data['items'][0] = None
@@ -341,6 +334,7 @@ class DisplayManager(tk.Frame):
                 del self.__changes, self.display_coords, self.__undoes
                 self.__changes = []
                 self.__undoes = []
+                self.__view_offset = [0, 0]
                 self.display_coords = []
 
                 self.__deselect()
@@ -370,15 +364,8 @@ class DisplayManager(tk.Frame):
                 self.__btn_reset.configure(state=tk.DISABLED)
                 self.__btn_apply.configure(state=tk.DISABLED)
 
-                # Find median point of all displays and shift canvas so they're centered
-                self.__canvas.xview_moveto(self.__orig_view[0])
-                self.__canvas.yview_moveto(self.__orig_view[1])
-
-                x1, y1, x2, y2 = (*self.__canvas.bbox(*self.__canvas.find_withtag('fg')),)
-                self._median_point = (x1 + (x2 - x1) // 2, y1 + (y2 - y1) // 2)
-
-                self.__canvas.scan_mark(self._median_point[0], self._median_point[1])
-                self.__canvas.scan_dragto(self.__canvas.winfo_width() // 2, self.__canvas.winfo_height() // 2, gain=1)
+                # Update canvas position
+                self.__reposition_canvas()
 
                 # Clear drag data
                 self.__drag_data['items'][0] = None
@@ -418,15 +405,8 @@ class DisplayManager(tk.Frame):
                 diff_xy = ((self.display_coords[int(self.__canvas.gettags(self.__drag_data['items'][0])[0]) - 1][0] // 10) - self.__canvas.bbox(self.__drag_data['items'][0])[0] - 1, (self.display_coords[int(self.__canvas.gettags(self.__drag_data['items'][0])[0]) - 1][1] // 10) - self.__canvas.bbox(self.__drag_data['items'][0])[1] - 1)
                 self.__move_current_display(*diff_xy)
 
-        # Find median point of all displays and shift canvas so they're centered
-        self.__canvas.xview_moveto(self.__orig_view[0])
-        self.__canvas.yview_moveto(self.__orig_view[1])
-
-        x1, y1, x2, y2 = (*self.__canvas.bbox(*self.__canvas.find_withtag('fg')),)
-        self._median_point = (x1 + (x2 - x1) // 2, y1 + (y2 - y1) // 2)
-
-        self.__canvas.scan_mark(self._median_point[0], self._median_point[1])
-        self.__canvas.scan_dragto(self.__canvas.winfo_width() // 2, self.__canvas.winfo_height() // 2, gain=1)
+        # Update canvas position
+        self.__reposition_canvas()
 
         # Update sidebar data
         self.__btn_reset.configure(state=tk.NORMAL)
@@ -467,15 +447,8 @@ class DisplayManager(tk.Frame):
                 self.__btn_reset.configure(state=tk.NORMAL)
                 self.__btn_apply.configure(state=tk.NORMAL)
 
-                # Find median point of all displays and shift canvas so they're centered
-                self.__canvas.xview_moveto(self.__orig_view[0])
-                self.__canvas.yview_moveto(self.__orig_view[1])
-
-                x1, y1, x2, y2 = (*self.__canvas.bbox(*self.__canvas.find_withtag('fg')),)
-                self._median_point = (x1 + (x2 - x1) // 2, y1 + (y2 - y1) // 2)
-
-                self.__canvas.scan_mark(self._median_point[0], self._median_point[1])
-                self.__canvas.scan_dragto(self.__canvas.winfo_width() // 2, self.__canvas.winfo_height() // 2, gain=1)
+                # Update canvas position
+                self.__reposition_canvas()
 
                 self.__saved[0] = False
                 self.__parent.title(self.__parent.title().strip('*') + '*')
@@ -506,30 +479,41 @@ class DisplayManager(tk.Frame):
         self.__prev_selected_display = self.__selected_display
 
         # Get selected display
+        self.__selected_display = None
         for item in self.__canvas.find_overlapping(self.__canvas.canvasx(event.x) - 2, self.__canvas.canvasy(event.y) - 2, self.__canvas.canvasx(event.x) + 2, self.__canvas.canvasy(event.y) + 2):
             if 'draggable' in self.__canvas.gettags(item) or 'static' in self.__canvas.gettags(item):
                 self.__selected_display = item
 
-        # Update drag coords if applicable
-        if 'draggable' in self.__canvas.gettags(self.__selected_display):
-            self.__drag_data['items'][0] = self.__selected_display
-            for item in self.__canvas.find_withtag(self.__canvas.gettags(self.__selected_display)[0]):
-                if 'disp_lbl' in self.__canvas.gettags(item):
-                    self.__drag_data['items'][1] = item
-                if 'prim_lbl' in self.__canvas.gettags(item):
-                    self.__drag_data['items'][2] = item
-            self.__drag_data['x'] = event.x
-            self.__drag_data['y'] = event.y
+        # Update drag coords
+        self.__drag_data['items'][0] = self.__selected_display
+        self.__drag_data['x'] = event.x
+        self.__drag_data['y'] = event.y
 
-        self.__update_selection()
+        if self.__selected_display:
+
+            # Update drag data if applicable
+            if 'draggable' in self.__canvas.gettags(self.__selected_display):
+                for item in self.__canvas.find_withtag(self.__canvas.gettags(self.__selected_display)[0]):
+                    if 'disp_lbl' in self.__canvas.gettags(item):
+                        self.__drag_data['items'][1] = item
+                    if 'prim_lbl' in self.__canvas.gettags(item):
+                        self.__drag_data['items'][2] = item
+            else:
+                self.__drag_data['items'][0] = None
+
+            self.__update_selection()
+
+        else:
+            self.__deselect()
 
 
     # When a user stops dragging
     # ------------------------------
     def __drag_stop(self, event):
 
-        # Check if any displays are overlapping and rearrange them until they don't
         if self.__drag_data['items'][0] and self.__drag_data['dragged']:
+
+            # Check if any displays are overlapping and rearrange them until they don't
             loop_iter = 0
             while True:
                 loop_iter += 1
@@ -571,15 +555,8 @@ class DisplayManager(tk.Frame):
             self.__ui_xy_vals[0].set(self.display_coords[int(self.__canvas.gettags(self.__drag_data['items'][0])[0]) - 1][0])
             self.__ui_xy_vals[1].set(self.display_coords[int(self.__canvas.gettags(self.__drag_data['items'][0])[0]) - 1][1])
 
-            # Find median point of all displays and shift canvas so they're centered
-            self.__canvas.xview_moveto(self.__orig_view[0])
-            self.__canvas.yview_moveto(self.__orig_view[1])
-
-            x1, y1, x2, y2 = (*self.__canvas.bbox(*self.__canvas.find_withtag('fg')),)
-            self._median_point = (x1 + (x2 - x1) // 2, y1 + (y2 - y1) // 2)
-
-            self.__canvas.scan_mark(self._median_point[0], self._median_point[1])
-            self.__canvas.scan_dragto(self.__canvas.winfo_width() // 2, self.__canvas.winfo_height() // 2, gain=1)
+            # Update canvas position
+            self.__reposition_canvas()
 
         # Clear drag data
         self.__drag_data['items'][0] = None
@@ -618,24 +595,40 @@ class DisplayManager(tk.Frame):
                 self.__btn_reset.configure(state=tk.NORMAL)
                 self.__btn_apply.configure(state=tk.NORMAL)
 
+            else:
+                self.__view_offset[0] += delta_x
+                self.__view_offset[1] += delta_y
+
+                self.__reposition_canvas()
+
             # Update current coords
             self.__drag_data['x'] = event.x
             self.__drag_data['y'] = event.y
 
 
+    # When a user right-clicks
+    # ---------------------
+    def __drag_reset(self, event):
+        self.__view_offset[0] = 0
+        self.__view_offset[1] = 0
+
+        self.__reposition_canvas()
+
+
     # When the window is resized
     # ------------------------------
-    def __resize(self, event):
+    def __reposition_canvas(self, event = None):
 
-        # Find median point of all displays and shift canvas so they're centered
+        # Find median point of all displays and shift canvas so they're centered, then apply canvas drag offset
         self.__canvas.xview_moveto(self.__orig_view[0])
         self.__canvas.yview_moveto(self.__orig_view[1])
 
-        x1, y1, x2, y2 = (*self.__canvas.bbox(*self.__canvas.find_withtag('fg')),)
-        self._median_point = (x1 + (x2 - x1) // 2, y1 + (y2 - y1) // 2)
+        if self.__view_offset[0] + self.__view_offset[1] == 0:
+            x1, y1, x2, y2 = (*self.__canvas.bbox(*self.__canvas.find_withtag('fg')),)
+            self._median_point = (x1 + (x2 - x1) // 2, y1 + (y2 - y1) // 2)
 
         self.__canvas.scan_mark(self._median_point[0], self._median_point[1])
-        self.__canvas.scan_dragto(self.__canvas.winfo_width() // 2, self.__canvas.winfo_height() // 2, gain=1)
+        self.__canvas.scan_dragto((self.__canvas.winfo_width() // 2) + self.__view_offset[0], (self.__canvas.winfo_height() // 2) + self.__view_offset[1], gain=1)
 
 
     # Move the currently selected display
@@ -644,16 +637,6 @@ class DisplayManager(tk.Frame):
 
         for i in range(3):
             self.__canvas.move(self.__drag_data['items'][i], x_offset, y_offset)
-
-
-    # Move the currently selected display
-    # ---------------------------------------
-    def __bind_drag_events(self, taglist):
-
-        for tag in taglist:
-            self.__canvas.tag_bind(tag, '<ButtonPress-1>', self.__drag_start)
-            self.__canvas.tag_bind(tag, '<ButtonRelease-1>', self.__drag_stop)
-            self.__canvas.tag_bind(tag, '<B1-Motion>', self.__drag)
 
 
     # Draw a grid on the canvas
@@ -750,7 +733,7 @@ class DisplayManager(tk.Frame):
 
         x, y, w, h = x//10, y//10, w//10, h//10
         self.__canvas.create_rectangle(x, y, x + w, y + h, outline='#2149c1', fill='#4169e1', tags=(*taglist, 'fg'))
-        self.__canvas.create_text(x + w / 2, y + h / 2, text=taglist[0], anchor='center', font=('Segoe UI', 48, 'normal'), fill='white', tags=(taglist[0], 'disp_lbl', 'fg'))
+        self.__canvas.create_text(x + w / 2, (y + h / 2) - 2, text=taglist[0], anchor='center', font=('Segoe UI', 48, 'normal'), fill='white', tags=(taglist[0], 'disp_lbl', 'fg'))
         self.__canvas.create_text(x + w - 6, y - 6, text=('*' if 'primary' in taglist else ''), anchor='ne', font=('Segoe UI', 24, 'normal'), fill='white', tags=(taglist[0], 'prim_lbl', 'fg'))
 
 
@@ -909,7 +892,7 @@ def save_profile_as(args=None):
 # Show info about the application
 # -----------------------------------
 def about_app(args=None):
-    messagebox.showinfo('About', 'DPEdit GUI v' + CURRENT_VERSION + '\nCopyright © 2024 Benjamin Pryor\nReleased under the MIT license')
+    messagebox.showinfo('About', 'DPEdit GUI v' + CURRENT_VERSION + '\nCopyright © 2025 Benjamin Pryor\nReleased under the MIT license')
 
 
 # Show all keyboard shortcuts
@@ -971,7 +954,8 @@ def check_for_updates(args=None):
             messagebox.showinfo(message='DPEdit-GUI has been updated successfully!\n The application will now restart to apply changes.', title='Success')
             Popen(['pyw', '-3', __file__], shell=True)
             Popen(['taskkill', '/IM', 'DPEdit-GUI.exe'], shell=True)
-            root.destroy()
+            if root:
+                root.destroy()
 
     # Update binaries if necessary
     if update_bin:
