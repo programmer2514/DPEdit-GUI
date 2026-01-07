@@ -1,4 +1,7 @@
 # DPEdit GUI
+
+### SOME ANTIVIRUS SOFTWARE MAY DETECT THIS APPLICATION AS A TROJAN. THIS IS A FALSE POSITIVE. SEE [ISSUE #1](https://github.com/programmer2514/DPEdit-GUI/issues/1) FOR DETAILS.
+
 ### [Download Here](https://github.com/programmer2514/DPEdit-GUI/releases/latest/download/DPEdit-GUI.exe)
 
 A simple UI for the [DPEdit](https://github.com/programmer2514/DPEdit) utility.
