@@ -47,8 +47,8 @@ RunApp:
 
             Loop, Parse, rawData, `n
             {
-                If RegExMatch(A_LoopField, "<a class=""button"" href=""(.+)\.exe"">Download Python [.0-9]+<\/a>")
-                    RegExMatch(A_LoopField, "<a class=""button"" href="".+\.exe"">Download Python [.0-9]+<\/a>", foundLine)
+                If RegExMatch(A_LoopField, "<a href=""(.+)\.exe"">Python [.0-9]+<\/a>")
+                    RegExMatch(A_LoopField, "<a href="".+\.exe"">Python [.0-9]+<\/a>", foundLine)
             }
 
             RegExMatch(foundLine, "https:.+exe", downloadURL)
