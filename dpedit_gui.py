@@ -1,6 +1,7 @@
 import tkinter as tk
 from re import search
 from requests import get
+from platform import machine
 from subprocess import Popen, PIPE, STDOUT
 from tkinter import messagebox, filedialog
 from webbrowser import open as open_url
@@ -10,9 +11,9 @@ from ast import literal_eval
 
 # Constants
 # -------------
-DPEDIT_URL = 'https://github.com/programmer2514/DPEdit/releases/latest/download/DPEdit.exe'
+DPEDIT_URL = 'https://github.com/programmer2514/DPEdit/releases/latest/download/DPEdit_{arch}.exe'
 UPDATE_URL = 'https://raw.githubusercontent.com/programmer2514/DPEdit-GUI/main/dpedit_gui.py'
-CURRENT_VERSION = "1.2.0"
+CURRENT_VERSION = "1.3.0"
 
 
 
@@ -923,8 +924,14 @@ def check_for_updates(args=None):
     update_bin = False
     update_app = False
 
+    # Get system architecture (default to x64)
+    if machine() == 'aarch64':
+        arch = 'ARM64'
+    else:
+        arch = 'x64'
+
     # Check for DPEdit updates
-    response_bin = get(DPEDIT_URL)
+    response_bin = get(DPEDIT_URL.format(arch = arch))
     try:
         file = open('DPEdit.exe', 'rb')
         local_content = file.read()
