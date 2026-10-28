@@ -88,7 +88,7 @@ Return
 
 InstallVCRedist:
     Try {
-        UrlDownloadToFile, https://aka.ms/vs/17/release/vc_redist.x86.exe, vc_redist.exe
+        UrlDownloadToFile, https://aka.ms/vc14/vc_redist.x64.exe, vc_redist.exe
         RunWait, vc_redist.exe /passive /norestart,, UseErrorLevel
         If Not (ErrorLevel = 0)
             Throw Exception("Failed to install vc_redist.exe!")

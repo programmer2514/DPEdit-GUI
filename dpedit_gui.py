@@ -13,7 +13,7 @@ from ast import literal_eval
 # -------------
 DPEDIT_URL = 'https://github.com/programmer2514/DPEdit/releases/latest/download/DPEdit_{arch}.exe'
 UPDATE_URL = 'https://raw.githubusercontent.com/programmer2514/DPEdit-GUI/main/dpedit_gui.py'
-CURRENT_VERSION = "1.3.0"
+CURRENT_VERSION = "1.3.1"
 
 
 
@@ -110,6 +110,10 @@ class DisplayManager(tk.Frame):
         for line in proc.stderr:
             if line:
                 messagebox.showerror(message='DPEdit failed to get display position(s)!', title='Error')
+
+        # Quit if no output (usually caused by missing vcredist installation)
+        if len(proc.stdout.peek(2).decode('utf-8')) == 0:
+            exit(1)
 
         # Parse results into an ordered list of dictionaries
         prev_index = 0
